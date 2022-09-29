@@ -18,6 +18,22 @@ src = env.ElfToBin( join("$BUILD_DIR", "${PROGNAME}"), elf )
 prg = env.Alias( "buildprog", src, [ env.VerboseAction("", "DONE") ] )
 AlwaysBuild( prg )
 
+def generate_uf2(target, source, env):
+    elf_file = target[0].get_path()
+    env.Execute(
+        " ".join(
+            [
+                "elf2uf2",
+                '"%s"' % elf_file,
+                '"%s"' % elf_file.replace(".elf", ".uf2"),
+            ]
+        )
+    )
+
+env.AddPostAction(
+    elf, env.VerboseAction(generate_uf2, "Generating UF2 image")
+)
+
 upload = env.Alias("upload", prg, [ 
     env.VerboseAction("$UPLOADCMD", "Uploading..."),
     env.VerboseAction("", ""),
